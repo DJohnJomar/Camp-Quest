@@ -4,11 +4,15 @@ const path = require('path');
 const Campground = require('./models/campground');
 const methodOverride = require('method-override');
 const morgan = require('morgan');
+const ejsMate = require('ejs-mate');
 
 const app = express();
 
+app.engine('ejs', ejsMate);
+
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
+
 app.use(express.static(path.join(__dirname, '/public')));
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride('_method'));

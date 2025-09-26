@@ -5,6 +5,7 @@ const Campground = require('./models/campground');
 const methodOverride = require('method-override');
 const morgan = require('morgan');
 const ejsMate = require('ejs-mate');
+const AppError = require('./AppError');
 
 const app = express();
 
@@ -47,7 +48,7 @@ app.post('/campgrounds', async (req, res) => {
   const campground = new Campground(req.body.campground);
   await campground.save();
   res.redirect(`/campgrounds/${campground._id}`);
-})
+});
 
 //Show
 app.get('/campgrounds/:id', async (req, res) => {
@@ -66,13 +67,14 @@ app.patch('/campgrounds/:id', async(req, res) => {
 app.get('/campgrounds/:id/edit', async (req, res) => {
   const campground = await Campground.findById(req.params.id);
   res.render('campgrounds/edit', {campground});
-})
+});
 
 //Delete 
 app.delete('/campgrounds/:id', async (req, res) => {
   await Campground.findByIdAndDelete(req.params.id);
   res.redirect('/campgrounds');
-})
+});
+
 
 
 

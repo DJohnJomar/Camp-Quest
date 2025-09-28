@@ -5,7 +5,7 @@ const Campground = require('./models/campground');
 const methodOverride = require('method-override');
 const morgan = require('morgan');
 const ejsMate = require('ejs-mate');
-const AppError = require('./AppError');
+const ExpressError = require('./utils/ExpressError');
 
 const app = express();
 
@@ -21,10 +21,10 @@ app.use(morgan('tiny')); //Logs requests (method, url, status code,  size, respo
 
 //Connect to db
 main()
-.then(() => {
-  console.log('Connected to DB!')
-})
-.catch(err => console.log(err));
+  .then(() => {
+    console.log('Connected to DB!')
+  })
+  .catch(err => console.log(err));
 async function main() {
   await mongoose.connect('mongodb://127.0.0.1:27017/camp-quest');
 };
@@ -36,7 +36,7 @@ app.get('/', (req, res) => {
 //Index, home show
 app.get('/campgrounds', async (req, res) => {
   const campgrounds = await Campground.find();
-  res.render('campgrounds/index', {campgrounds});
+  res.render('campgrounds/index', { campgrounds });
 });
 
 //Creating new
@@ -44,7 +44,11 @@ app.get('/campgrounds/new', (req, res) => {
   res.render('campgrounds/new');
 });
 
-app.post('/campgrounds', async (req, res) => {
+app.post('/campgrounds', async (req, res, next) => {
+  const {price} = req.body.campground;
+  if(!req.body.campground) return next(new ExpressError('Invalid campground data', 400));
+  if(price <= 0) return next(new ExpressError(422, "Price must be greater than 0"));
+  
   const campground = new Campground(req.body.campground);
   await campground.save();
   res.redirect(`/campgrounds/${campground._id}`);
@@ -52,21 +56,24 @@ app.post('/campgrounds', async (req, res) => {
 
 //Show
 app.get('/campgrounds/:id', async (req, res) => {
-  const {id} = req.params;
+  const { id } = req.params;
   const campground = await Campground.findById(id);
-  res.render('campgrounds/show', {campground});
+  res.render('campgrounds/show', { campground });
 });
 
 //Updating
-app.patch('/campgrounds/:id', async(req, res) => {
-  const campground = await Campground.findByIdAndUpdate(req.params.id, req.body.campground, {new:true, runValidators:true});
+app.patch('/campgrounds/:id', async (req, res, next) => {
+  const {price} = req.body.campground;
+  if(!req.body.campground) return next(new ExpressError('Invalid campground data', 400));
+  if(price <= 0) return next(new ExpressError(422, "Price must be greater than 0"));
+  const campground = await Campground.findByIdAndUpdate(req.params.id, req.body.campground, { new: true, runValidators: true });
   res.redirect(`/campgrounds/${campground._id}`);
 });
 
 //Edit show
 app.get('/campgrounds/:id/edit', async (req, res) => {
   const campground = await Campground.findById(req.params.id);
-  res.render('campgrounds/edit', {campground});
+  res.render('campgrounds/edit', { campground });
 });
 
 //Delete 
@@ -75,8 +82,14 @@ app.delete('/campgrounds/:id', async (req, res) => {
   res.redirect('/campgrounds');
 });
 
+app.all(/(.*)/, (req, res, next) => {
+  next(new ExpressError(404, 'Page Not Found!'));
+});
 
-
+app.use((err, req, res, next) => {
+  const {status = 500, message = 'Something went wrong!'} = err;
+  res.status(status).render('error', {err});
+});
 
 app.listen(3000, () => {
   console.log('Serving on port 3000');

@@ -21,16 +21,22 @@
                         Looks good!
                     </div>
                 </div>
+
                 <div class="mb-3">
                     <label for="price">Campground Price</label>
-                    <div class="input-group">
+                    <div class="input-group has-validation">
                         <span class="input-group-text" id="basic-addon1">$</span>
                         <input type="number" class="form-control" placeholder="0.00" aria-label="Price"
-                            aria-describedby="price-label" id="price" name="campground[price]" required>
+                            aria-describedby="price-label" id="price" name="campground[price]"
+                            value="<%= campground.price %>" required>
                         <div class="valid-feedback">
                             Looks good!
                         </div>
+                        <div class="invalid-feedback">
+                            Invalid price.
+                        </div>
                     </div>
+
                 </div>
 
                 <div class="mb-3">

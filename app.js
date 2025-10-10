@@ -30,6 +30,7 @@ async function main() {
   await mongoose.connect('mongodb://127.0.0.1:27017/camp-quest');
 };
 
+//function used as middleware for campground validation
 const validateCampground = (req, res, next) => {
   //Joi Schema
   const { error } = campgroundSchema.validate(req.body);
@@ -57,14 +58,13 @@ app.get('/campgrounds/new', (req, res) => {
   res.render('campgrounds/new');
 });
 
-
-
 app.post('/campgrounds', validateCampground, async (req, res, next) => {
   // if(!req.body.campground) return next(new ExpressError('Invalid campground data', 400));
   const campground = new Campground(req.body.campground);
   await campground.save();
   res.redirect(`/campgrounds/${campground._id}`);
 });
+
 
 //Show
 app.get('/campgrounds/:id', async (req, res) => {
@@ -73,12 +73,14 @@ app.get('/campgrounds/:id', async (req, res) => {
   res.render('campgrounds/show', { campground });
 });
 
+
 //Updating
 app.patch('/campgrounds/:id', validateCampground, async (req, res, next) => {
   // if(!req.body.campground) return next(new ExpressError('Invalid campground data', 400));
   const campground = await Campground.findByIdAndUpdate(req.params.id, req.body.campground, { new: true, runValidators: true });
   res.redirect(`/campgrounds/${campground._id}`);
 });
+
 
 //Edit show
 app.get('/campgrounds/:id/edit', async (req, res) => {
@@ -92,10 +94,13 @@ app.delete('/campgrounds/:id', async (req, res) => {
   res.redirect('/campgrounds');
 });
 
+//fallback route when no route is matched in the requests
 app.all(/(.*)/, (req, res, next) => {
   next(new ExpressError(404, 'Page Not Found!'));
 });
 
+//Error handling middleware
+//Renders the error page
 app.use((err, req, res, next) => {
   const { status = 500, message = 'Something went wrong!' } = err;
   res.status(status).render('error', { err });

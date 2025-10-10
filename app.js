@@ -6,6 +6,7 @@ const methodOverride = require('method-override');
 const morgan = require('morgan');
 const ejsMate = require('ejs-mate');
 const ExpressError = require('./utils/ExpressError');
+const {campgroundSchema} = require('./schemas.js');
 
 const app = express();
 
@@ -29,6 +30,18 @@ async function main() {
   await mongoose.connect('mongodb://127.0.0.1:27017/camp-quest');
 };
 
+const validateCampground = (req, res, next) => {
+  //Joi Schema
+  const { error } = campgroundSchema.validate(req.body);
+  if (error) {
+    console.log(error);
+    const message = error.details.map(el => el.message).join(',');
+    throw new ExpressError(400, message);
+  }else{
+    next();
+  }
+};
+
 app.get('/', (req, res) => {
   res.render('home');
 });
@@ -44,11 +57,10 @@ app.get('/campgrounds/new', (req, res) => {
   res.render('campgrounds/new');
 });
 
-app.post('/campgrounds', async (req, res, next) => {
-  const {price} = req.body.campground;
-  if(!req.body.campground) return next(new ExpressError('Invalid campground data', 400));
-  if(price <= 0) return next(new ExpressError(422, "Price must be greater than 0"));
-  
+
+
+app.post('/campgrounds', validateCampground, async (req, res, next) => {
+  // if(!req.body.campground) return next(new ExpressError('Invalid campground data', 400));
   const campground = new Campground(req.body.campground);
   await campground.save();
   res.redirect(`/campgrounds/${campground._id}`);
@@ -62,10 +74,8 @@ app.get('/campgrounds/:id', async (req, res) => {
 });
 
 //Updating
-app.patch('/campgrounds/:id', async (req, res, next) => {
-  const {price} = req.body.campground;
-  if(!req.body.campground) return next(new ExpressError('Invalid campground data', 400));
-  if(price <= 0) return next(new ExpressError(422, "Price must be greater than 0"));
+app.patch('/campgrounds/:id', validateCampground, async (req, res, next) => {
+  // if(!req.body.campground) return next(new ExpressError('Invalid campground data', 400));
   const campground = await Campground.findByIdAndUpdate(req.params.id, req.body.campground, { new: true, runValidators: true });
   res.redirect(`/campgrounds/${campground._id}`);
 });
@@ -87,8 +97,8 @@ app.all(/(.*)/, (req, res, next) => {
 });
 
 app.use((err, req, res, next) => {
-  const {status = 500, message = 'Something went wrong!'} = err;
-  res.status(status).render('error', {err});
+  const { status = 500, message = 'Something went wrong!' } = err;
+  res.status(status).render('error', { err });
 });
 
 app.listen(3000, () => {

@@ -6,7 +6,7 @@ const methodOverride = require('method-override');
 const morgan = require('morgan');
 const ejsMate = require('ejs-mate');
 const ExpressError = require('./utils/ExpressError');
-const {campgroundSchema} = require('./schemas.js');
+const {campgroundJoiSchema} = require('./joiSchemas.js');
 
 const app = express();
 
@@ -33,7 +33,7 @@ async function main() {
 //function used as middleware for campground validation
 const validateCampground = (req, res, next) => {
   //Joi Schema
-  const { error } = campgroundSchema.validate(req.body);
+  const { error } = campgroundJoiSchema.validate(req.body);
   if (error) {
     console.log(error);
     const message = error.details.map(el => el.message).join(',');

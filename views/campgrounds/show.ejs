@@ -30,18 +30,34 @@
             </div>
 
             <h2>Leave a Review</h2>
-            <form action="" class="mb-3">
+            <form action="/campgrounds/<%= campground._id %>/reviews" method="POST" class="mb-3">
                 <div class="mb-3">
                     <label class="form-label" for="rating">Rating</label>
                     <input class="form-range" type="range" name="review[rating]" id="rating" min="1" max="5">
                 </div>
                 <div class="mb-3">
 
-                    <label class="form-label" for="body">Review</label>
+                    <label class="form-label" for="body">Reqview</label>
                     <textarea class="form-control" name="review[body]" id="body" rows="3" cols="30"></textarea>
                 </div>
                 <button class="btn btn-success">Submit</button>
             </form>
+
+            <h2>Reviews</h2>
+            <% if(campground.reviews.length) {%>
+                <% for (review of campground.reviews) { %>
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h3 class="card-title"><%= review.rating %></h3>
+                            <p class="card-text"> <%= review.body %></p>
+                        </div>
+                    </div>
+                    <% }%>
+            <% } else{ %>
+                <h3>No reviews yet</h3>
+            <% } %>
+
+
 
         </div>
     </div>

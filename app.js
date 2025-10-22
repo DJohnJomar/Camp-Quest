@@ -6,7 +6,8 @@ const methodOverride = require('method-override');
 const morgan = require('morgan');
 const ejsMate = require('ejs-mate');
 const ExpressError = require('./utils/ExpressError');
-const {campgroundJoiSchema} = require('./joiSchemas.js');
+const { campgroundJoiSchema } = require('./joiSchemas.js');
+const Review = require('./models/review');
 
 const app = express();
 
@@ -38,7 +39,7 @@ const validateCampground = (req, res, next) => {
     console.log(error);
     const message = error.details.map(el => el.message).join(',');
     throw new ExpressError(400, message);
-  }else{
+  } else {
     next();
   }
 };
@@ -68,8 +69,7 @@ app.post('/campgrounds', validateCampground, async (req, res, next) => {
 
 //Show
 app.get('/campgrounds/:id', async (req, res) => {
-  const { id } = req.params;
-  const campground = await Campground.findById(id);
+  const campground = await Campground.findById(req.params.id).populate('reviews');
   res.render('campgrounds/show', { campground });
 });
 
@@ -93,6 +93,16 @@ app.delete('/campgrounds/:id', async (req, res) => {
   await Campground.findByIdAndDelete(req.params.id);
   res.redirect('/campgrounds');
 });
+
+//New Review
+app.post('/campgrounds/:id/reviews', async (req, res) => {
+  const campground = await Campground.findById(req.params.id);
+  const review = new Review(req.body.review);
+  campground.reviews.push(review);
+  await review.save();
+  await campground.save();
+  res.redirect(`/campgrounds/${campground._id}`);
+})
 
 //fallback route when no route is matched in the requests
 app.all(/(.*)/, (req, res, next) => {

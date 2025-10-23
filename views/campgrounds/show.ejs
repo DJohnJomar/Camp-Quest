@@ -1,74 +1,74 @@
 <% layout('layouts/boilerplate') %>
 
-    <div class="row">
-        <div class="col-6 offset-3">
-            <div class="card">
-                <img src="<%= campground.image %>" class="card-img-top" alt="...">
-                <div class="card-body">
-                    <h5 class="card-title">
-                        <%= campground.title %>
-                    </h5>
-                    <p class="card-text">
-                        <%= campground.description %>
-                    </p>
-                </div>
-                <ul class="list-group list-group-flush">
-                    <li class="list-group-item">
-                        <%= campground.location %>
-                    </li>
-                    <li class="list-group-item"><b>$</b>
-                        <%= campground.price %>/night
-                    </li>
-                </ul>
-                <div class="card-body d-flex justify-content-around">
-                    <a href="/campgrounds/<%= campground._id %>/edit" class="card-link btn btn-info">Edit Campground</a>
-                    <form action="/campgrounds/<%= campground._id %>?_method=DELETE" method="POST">
-                        <button class="btn btn-danger">Delete Campground</button>
-                    </form>
-                    <a href="/campgrounds" class="card-link btn btn-secondary">All Campgrounds</a>
-                </div>
+<div class="row d-flex justify-content-evenly">
+    <div class="col-6">
+        <div class="card">
+            <img src="<%= campground.image %>" class="card-img-top" alt="...">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <%= campground.title %>
+                </h5>
+                <p class="card-text">
+                    <%= campground.description %>
+                </p>
             </div>
-
-            <h2>Leave a Review</h2>
-            <form action="/campgrounds/<%= campground._id %>/reviews" method="POST" class="mb-3 needs-validation"
-                novalidate>
-                <div class="mb-3">
-                    <label class="form-label" for="rating">Rating</label>
-                    <input class="form-range" type="range" name="review[rating]" id="rating" min="1" max="5">
-                </div>
-                <div class="mb-3">
-
-                    <label class="form-label" for="body">Reqview</label>
-                    <textarea class="form-control" name="review[body]" id="body" rows="3" cols="30" required></textarea>
-                    <div class="valid-feedback">
-                        Looks good!
-                    </div>
-                    <div class="invalid-feedback">
-                        Invalid input.
-                    </div>
-                </div>
-                <button class="btn btn-success">Submit</button>
-            </form>
-
-            <h2>Reviews</h2>
-            <% if(campground.reviews.length) {%>
-                <% for (review of campground.reviews) { %>
-                    <div class="card mb-3">
-                        <div class="card-body">
-                            <h3 class="card-title">
-                                <%= review.rating %>
-                            </h3>
-                            <p class="card-text">
-                                <%= review.body %>
-                            </p>
-                        </div>
-                    </div>
-                    <% }%>
-                        <% } else{ %>
-                            <h3>No reviews yet</h3>
-                            <% } %>
-
-
-
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item">
+                    <%= campground.location %>
+                </li>
+                <li class="list-group-item"><b>$</b>
+                    <%= campground.price %>/night
+                </li>
+            </ul>
+            <div class="card-body d-flex justify-content-around">
+                <a href="/campgrounds/<%= campground._id %>/edit" class="card-link btn btn-info">Edit Campground</a>
+                <form action="/campgrounds/<%= campground._id %>?_method=DELETE" method="POST">
+                    <button class="btn btn-danger">Delete Campground</button>
+                </form>
+                <a href="/campgrounds" class="card-link btn btn-secondary">All Campgrounds</a>
+            </div>
         </div>
     </div>
+
+    <div class="col-6">
+        <h2>Leave a Review</h2>
+        <form action="/campgrounds/<%= campground._id %>/reviews" method="POST" class="mb-3 needs-validation"
+            novalidate>
+            <div class="mb-3">
+                <label class="form-label" for="rating">Rating</label>
+                <input class="form-range" type="range" name="review[rating]" id="rating" min="1" max="5">
+            </div>
+            <div class="mb-3">
+
+                <label class="form-label" for="body">Reqview</label>
+                <textarea class="form-control" name="review[body]" id="body" rows="3" cols="30" required></textarea>
+                <div class="valid-feedback">
+                    Looks good!
+                </div>
+                <div class="invalid-feedback">
+                    Invalid input.
+                </div>
+            </div>
+            <button class="btn btn-success">Submit</button>
+        </form>
+
+        <h2>Reviews</h2>
+        <% if(campground.reviews.length) {%>
+            <% for (review of campground.reviews) { %>
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Rating: <%= review.rating %>/5</h5>
+                        <p class="card-text"><%= review.body %></p>
+                    </div>
+                    
+                </div>
+                <% }%>
+        <% } else{ %>
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="text-secondary">No reviews yet</h5>
+                </div>
+            </div>
+        <% } %>
+    </div>
+</div>

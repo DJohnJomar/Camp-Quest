@@ -119,6 +119,14 @@ app.post('/campgrounds/:id/reviews', validateReview, async (req, res) => {
   await review.save();
   await campground.save();
   res.redirect(`/campgrounds/${campground._id}`);
+});
+
+//Delete Review
+app.delete('/campgrounds/:id/reviews/:reviewId', async (req, res) => {
+  const {id, reviewId} = req.params;
+  await Campground.findByIdAndUpdate(id, {$pull:{reviews:reviewId}}); //pull removes from an array matching a condition.
+  await Review.findByIdAndDelete(reviewId);
+  res.redirect(`/campgrounds/${id}`);
 })
 
 //fallback route when no route is matched in the requests

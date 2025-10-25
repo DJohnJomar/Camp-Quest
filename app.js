@@ -6,11 +6,8 @@ const morgan = require('morgan');
 const ejsMate = require('ejs-mate');
 const ExpressError = require('./utils/ExpressError');
 
-const Campground = require('./models/campground');
-const Review = require('./models/review');
-
-const { campgroundJoiSchema } = require('./joiSchemas.js');
-const { reviewJoiSchema } = require('./joiSchemas.js');
+const campgroundRoutes = require('./routes/campgrounds.js');
+const reviewRoutes = require('./routes/reviews.js');
 
 const app = express();
 
@@ -24,6 +21,10 @@ app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride('_method'));
 app.use(morgan('tiny')); //Logs requests (method, url, status code,  size, response size, response time)
 
+//Routes
+app.use('/campgrounds', campgroundRoutes);
+app.use('/campgrounds/:id/reviews', reviewRoutes);
+
 //Connect to db
 main()
   .then(() => {
@@ -34,100 +35,10 @@ async function main() {
   await mongoose.connect('mongodb://127.0.0.1:27017/camp-quest');
 };
 
-const validateReview = (req, res, next) => {
-  const { error } = reviewJoiSchema.validate(req.body);
-  if (error) {
-    console.log(error);
-    const message = error.details.map(el => el.message).join(',');
-    throw new ExpressError(400, message);
-  } else {
-    next();
-  }
-}
-
-//function used as middleware for campground validation
-const validateCampground = (req, res, next) => {
-  //Joi Schema
-
-  const { error } = campgroundJoiSchema.validate(req.body);
-  if (error) {
-    console.log(error);
-    const message = error.details.map(el => el.message).join(',');
-    throw new ExpressError(400, message);
-  } else {
-    next();
-  }
-};
-
+//Root path or Route
 app.get('/', (req, res) => {
   res.render('home');
 });
-
-//Index, home show
-app.get('/campgrounds', async (req, res) => {
-  const campgrounds = await Campground.find();
-  res.render('campgrounds/index', { campgrounds });
-});
-
-//Creating new
-app.get('/campgrounds/new', (req, res) => {
-  res.render('campgrounds/new');
-});
-
-app.post('/campgrounds', validateCampground, async (req, res, next) => {
-  // if(!req.body.campground) return next(new ExpressError('Invalid campground data', 400));
-  const campground = new Campground(req.body.campground);
-  await campground.save();
-  res.redirect(`/campgrounds/${campground._id}`);
-});
-
-
-//Show
-app.get('/campgrounds/:id', async (req, res) => {
-  const campground = await Campground.findById(req.params.id).populate('reviews');
-  res.render('campgrounds/show', { campground });
-});
-
-
-//Updating
-app.patch('/campgrounds/:id', validateCampground, async (req, res, next) => {
-  // if(!req.body.campground) return next(new ExpressError('Invalid campground data', 400));
-  const campground = await Campground.findByIdAndUpdate(req.params.id, req.body.campground, { new: true, runValidators: true });
-  res.redirect(`/campgrounds/${campground._id}`);
-});
-
-
-//Edit show
-app.get('/campgrounds/:id/edit', async (req, res) => {
-  const campground = await Campground.findById(req.params.id);
-  res.render('campgrounds/edit', { campground });
-});
-
-//Delete 
-app.delete('/campgrounds/:id', async (req, res) => {
-  await Campground.findByIdAndDelete(req.params.id);
-  res.redirect('/campgrounds');
-});
-
-//New Review
-app.post('/campgrounds/:id/reviews', validateReview, async (req, res) => {
-  console.log('Request Body: ' + req.body);
-  // console.log('Request Body Review: ' + req.body.review);
-  const campground = await Campground.findById(req.params.id);
-  const review = new Review(req.body.review);
-  campground.reviews.push(review);
-  await review.save();
-  await campground.save();
-  res.redirect(`/campgrounds/${campground._id}`);
-});
-
-//Delete Review
-app.delete('/campgrounds/:id/reviews/:reviewId', async (req, res) => {
-  const {id, reviewId} = req.params;
-  await Campground.findByIdAndUpdate(id, {$pull:{reviews:reviewId}}); //pull removes from an array matching a condition.
-  await Review.findByIdAndDelete(reviewId);
-  res.redirect(`/campgrounds/${id}`);
-})
 
 //fallback route when no route is matched in the requests
 app.all(/(.*)/, (req, res, next) => {

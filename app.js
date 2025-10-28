@@ -5,6 +5,8 @@ const methodOverride = require('method-override');
 const morgan = require('morgan');
 const ejsMate = require('ejs-mate');
 const ExpressError = require('./utils/ExpressError');
+const session = require('express-session');
+const flash = require('connect-flash');
 
 const campgroundRoutes = require('./routes/campgrounds.js');
 const reviewRoutes = require('./routes/reviews.js');
@@ -20,6 +22,19 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride('_method'));
 app.use(morgan('tiny')); //Logs requests (method, url, status code,  size, response size, response time)
+
+//Sessions & flash
+const sessionConfig = {
+  secret:'secretnot', 
+  resave:false, 
+  saveUninitialized: true,
+  cookie: {
+    expires: Date.now() + 1000 * 60 * 60 * 24 * 7,
+    maxAge: 1000 * 60 * 60 * 24 * 7
+  }
+};
+app.use(session(sessionConfig));
+app.use(flash());
 
 //Routes
 app.use('/campgrounds', campgroundRoutes);

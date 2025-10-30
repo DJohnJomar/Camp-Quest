@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const {campgroundJoiSchema} = require('../joiSchemas.js');
+const { campgroundJoiSchema } = require('../joiSchemas.js');
 const Campground = require('../models/campground.js');
 const ExpressError = require('../utils/ExpressError');
 
@@ -38,6 +38,10 @@ router.post('/', validateCampground, async (req, res, next) => {
 //Show
 router.get('/:id', async (req, res) => {
   const campground = await Campground.findById(req.params.id).populate('reviews');
+  if (!campground) {
+    req.flash('error', 'Campground Not Found!');
+    return res.redirect('/campgrounds');
+  }
   res.render('campgrounds/show', { campground });
 });
 
@@ -53,6 +57,10 @@ router.patch('/:id', validateCampground, async (req, res, next) => {
 //Edit show
 router.get('/:id/edit', async (req, res) => {
   const campground = await Campground.findById(req.params.id);
+  if (!campground) {
+    req.flash('error', 'Campground Not Found!');
+    return res.redirect('/campgrounds');
+  }
   res.render('campgrounds/edit', { campground });
 });
 

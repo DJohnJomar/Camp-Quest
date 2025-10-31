@@ -11,8 +11,10 @@ const passport = require('passport');
 const LocalStrategy = require('passport-local');
 const User = require('./models/user');
 
+//Routes
 const campgroundRoutes = require('./routes/campgrounds.js');
 const reviewRoutes = require('./routes/reviews.js');
+const userRoutes = require('./routes/users.js');
 
 const app = express();
 
@@ -56,6 +58,7 @@ passport.deserializeUser(User.deserializeUser);
 //Routes
 app.use('/campgrounds', campgroundRoutes);
 app.use('/campgrounds/:id/reviews', reviewRoutes);
+app.use('/', userRoutes);
 
 //Connect to db
 main()

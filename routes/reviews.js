@@ -4,6 +4,7 @@ const {reviewJoiSchema} = require('../joiSchemas');
 const Review = require('../models/review');
 const Campground = require('../models/campground');
 const ExpressError = require('../utils/ExpressError');
+const {isLoggedIn} = require('../middleware.js');
 
 const validateReview = (req, res, next) => {
   const { error } = reviewJoiSchema.validate(req.body);
@@ -17,7 +18,7 @@ const validateReview = (req, res, next) => {
 }
 
 //New Review
-router.post('/', validateReview, async (req, res) => {
+router.post('/', isLoggedIn, validateReview, async (req, res) => {
   console.log('Request Body: ' + req.body);
   const campground = await Campground.findById(req.params.id);
   const review = new Review(req.body.review);
@@ -29,7 +30,7 @@ router.post('/', validateReview, async (req, res) => {
 });
 
 //Delete Review
-router.delete('/:reviewId', async (req, res) => {
+router.delete('/:reviewId', isLoggedIn, async (req, res) => {
   const {id, reviewId} = req.params;
   await Campground.findByIdAndUpdate(id, {$pull:{reviews:reviewId}}); //pull removes from an array matching a condition.
   await Review.findByIdAndDelete(reviewId);

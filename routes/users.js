@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/user');
+const passport = require('passport');
+
 
 router.get('/register', (req, res) => {
     res.render('users/register');
@@ -18,6 +20,16 @@ router.post('/register', async (req, res) => {
         res.redirect('/register');
     }
 
+});
+
+router.get('/login',(req, res) => {
+  res.render('users/login');
+});
+
+router.post('/login', passport.authenticate('local', {failureFlash:true, failureRedirect: '/login'}),async (req, res) => {
+//If we made it in this part, we know that the info passed in is authenticated successfully
+    req.flash('success', 'Welcome back!');
+    res.redirect('/campgrounds');
 })
 
 module.exports = router;

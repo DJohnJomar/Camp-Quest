@@ -17,8 +17,14 @@ const validateCampground = (req, res, next) => {
   }
 };
 
-const isPermitted = (req, res, next) => {
-  
+const isAuthor = async (req, res, next) => {
+  const {id} = req.params;
+  const campground = await Campground.findById(id);
+  if (!campground.author.equals(req.user._id)) {
+    req.flash('error', 'You do not have permission to do that.');
+    return res.redirect(`/campgrounds/${campground._id}`);
+  }
+  next();
 }
 
 //Index, home show
@@ -53,35 +59,25 @@ router.get('/:id', async (req, res) => {
 
 
 //Updating
-router.patch('/:id', isLoggedIn, validateCampground, async (req, res, next) => {
-  const { id } = req.params;
-  const campground = await Campground.findById(id);
-  if (!campground.author.equals(req.user._id)) {
-    req.flash('error', 'You do not have permission to do that.');
-    return res.redirect(`/campgrounds/${campground._id}`);
-  }
-  const camp = await Campground.findByIdAndUpdate(req.params.id, req.body.campground, { new: true, runValidators: true });
+router.patch('/:id', isLoggedIn, isAuthor, validateCampground, async (req, res, next) => {
+  const campground = await Campground.findByIdAndUpdate(req.params.id, req.body.campground, { new: true, runValidators: true });
   req.flash('success', 'Successfuly Updated Campground!');
   res.redirect(`/campgrounds/${campground._id}`);
 });
 
 
 //Edit show
-router.get('/:id/edit', isLoggedIn, async (req, res) => {
+router.get('/:id/edit', isLoggedIn, isAuthor, async (req, res) => {
   const campground = await Campground.findById(req.params.id);
   if (!campground) {
     req.flash('error', 'Campground Not Found!');
     return res.redirect('/campgrounds');
   }
-  if (!campground.author.equals(req.user._id)) {
-    req.flash('error', 'You do not have permission to do that.');
-    return res.redirect(`/campgrounds/${campground._id}`);
-  }
   res.render('campgrounds/edit', { campground });
 });
 
 //Delete 
-router.delete('/:id', isLoggedIn, async (req, res) => {
+router.delete('/:id', isLoggedIn, isAuthor,async (req, res) => {
   await Campground.findByIdAndDelete(req.params.id);
   req.flash('success', 'Campground Deleted Successfully!');
   res.redirect('/campgrounds');

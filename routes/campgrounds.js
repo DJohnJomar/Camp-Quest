@@ -1,31 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const { campgroundJoiSchema } = require('../joiSchemas.js');
 const Campground = require('../models/campground.js');
-const ExpressError = require('../utils/ExpressError');
-const { isLoggedIn } = require('../middleware.js');
-
-//function used as middleware for campground validation
-const validateCampground = (req, res, next) => {
-  const { error } = campgroundJoiSchema.validate(req.body);
-  if (error) {
-    console.log(error);
-    const message = error.details.map(el => el.message).join(',');
-    throw new ExpressError(400, message);
-  } else {
-    next();
-  }
-};
-
-const isAuthor = async (req, res, next) => {
-  const {id} = req.params;
-  const campground = await Campground.findById(id);
-  if (!campground.author.equals(req.user._id)) {
-    req.flash('error', 'You do not have permission to do that.');
-    return res.redirect(`/campgrounds/${campground._id}`);
-  }
-  next();
-}
+const { isLoggedIn, validateCampground, isAuthor } = require('../middleware.js');
 
 //Index, home show
 router.get('', async (req, res) => {

@@ -4,18 +4,7 @@ const {reviewJoiSchema} = require('../joiSchemas');
 const Review = require('../models/review');
 const Campground = require('../models/campground');
 const ExpressError = require('../utils/ExpressError');
-const {isLoggedIn} = require('../middleware.js');
-
-const validateReview = (req, res, next) => {
-  const { error } = reviewJoiSchema.validate(req.body);
-  if (error) {
-    console.log(error);
-    const message = error.details.map(el => el.message).join(',');
-    throw new ExpressError(400, message);
-  } else {
-    next();
-  }
-}
+const {isLoggedIn, validateReview} = require('../middleware.js');
 
 //New Review
 router.post('/', isLoggedIn, validateReview, async (req, res) => {

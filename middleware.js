@@ -1,3 +1,7 @@
+const {campgroundJoiSchema, reviewJoiSchema} = require('./joiSchemas');
+const Campground = require('./models/campground');
+const ExpressError = require('./utils/ExpressError');
+
 module.exports.isLoggedIn = (req, res, next) => {
     if (!req.isAuthenticated()) {
         // Capture return path
@@ -23,4 +27,37 @@ module.exports.storeReturnTo = (req, res, next) => {
     }
     next();
 };
+
+//function used as middleware for campground validation
+module.exports.validateCampground = (req, res, next) => {
+  const { error } = campgroundJoiSchema.validate(req.body);
+  if (error) {
+    console.log(error);
+    const message = error.details.map(el => el.message).join(',');
+    throw new ExpressError(400, message);
+  } else {
+    next();
+  }
+};
+
+module.exports.validateReview = (req, res, next) => {
+  const { error } = reviewJoiSchema.validate(req.body);
+  if (error) {
+    console.log(error);
+    const message = error.details.map(el => el.message).join(',');
+    throw new ExpressError(400, message);
+  } else {
+    next();
+  }
+}
+
+module.exports.isAuthor = async (req, res, next) => {
+  const {id} = req.params;
+  const campground = await Campground.findById(id);
+  if (!campground.author.equals(req.user._id)) {
+    req.flash('error', 'You do not have permission to do that.');
+    return res.redirect(`/campgrounds/${campground._id}`);
+  }
+  next();
+}
 

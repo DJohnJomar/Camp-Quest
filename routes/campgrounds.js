@@ -3,7 +3,7 @@ const router = express.Router();
 const { campgroundJoiSchema } = require('../joiSchemas.js');
 const Campground = require('../models/campground.js');
 const ExpressError = require('../utils/ExpressError');
-const {isLoggedIn} = require('../middleware.js');
+const { isLoggedIn } = require('../middleware.js');
 
 //function used as middleware for campground validation
 const validateCampground = (req, res, next) => {
@@ -17,6 +17,10 @@ const validateCampground = (req, res, next) => {
   }
 };
 
+const isPermitted = (req, res, next) => {
+  
+}
+
 //Index, home show
 router.get('', async (req, res) => {
   const campgrounds = await Campground.find();
@@ -24,7 +28,7 @@ router.get('', async (req, res) => {
 });
 
 //Creating new
-router.get('/new', isLoggedIn,(req, res) => {
+router.get('/new', isLoggedIn, (req, res) => {
   res.render('campgrounds/new');
 });
 
@@ -50,7 +54,13 @@ router.get('/:id', async (req, res) => {
 
 //Updating
 router.patch('/:id', isLoggedIn, validateCampground, async (req, res, next) => {
-  const campground = await Campground.findByIdAndUpdate(req.params.id, req.body.campground, { new: true, runValidators: true });
+  const { id } = req.params;
+  const campground = await Campground.findById(id);
+  if (!campground.author.equals(req.user._id)) {
+    req.flash('error', 'You do not have permission to do that.');
+    return res.redirect(`/campgrounds/${campground._id}`);
+  }
+  const camp = await Campground.findByIdAndUpdate(req.params.id, req.body.campground, { new: true, runValidators: true });
   req.flash('success', 'Successfuly Updated Campground!');
   res.redirect(`/campgrounds/${campground._id}`);
 });
@@ -62,6 +72,10 @@ router.get('/:id/edit', isLoggedIn, async (req, res) => {
   if (!campground) {
     req.flash('error', 'Campground Not Found!');
     return res.redirect('/campgrounds');
+  }
+  if (!campground.author.equals(req.user._id)) {
+    req.flash('error', 'You do not have permission to do that.');
+    return res.redirect(`/campgrounds/${campground._id}`);
   }
   res.render('campgrounds/edit', { campground });
 });

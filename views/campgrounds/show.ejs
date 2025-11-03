@@ -30,9 +30,6 @@
                     <form action="/campgrounds/<%= campground._id %>?_method=DELETE" method="POST">
                         <button class="btn btn-danger">Delete Campground</button>
                     </form>
-
-                    <a href="/campgrounds" class="card-link btn btn-secondary">All Campgrounds</a> 
-                    
                 <% } else{ %>
                     <a href="/campgrounds" class="card-link btn btn-secondary">All Campgrounds</a>  
                 <% } %>
@@ -53,7 +50,7 @@
                 </div>
                 <div class="mb-3">
 
-                    <label class="form-label" for="body">Reqview</label>
+                    <label class="form-label" for="body">Review</label>
                     <textarea class="form-control" name="review[body]" id="body" rows="3" cols="30" required></textarea>
                     <div class="valid-feedback">
                         Looks good!

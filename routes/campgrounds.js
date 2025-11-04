@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Campground = require('../models/campground.js');
 const { isLoggedIn, validateCampground, isAuthor } = require('../middleware.js');
-const campgrounds = require('../controllers/campground.js');
+const campgrounds = require('../controllers/campgrounds.js');
 
 //Index, home show
 router.get('', campgrounds.index);

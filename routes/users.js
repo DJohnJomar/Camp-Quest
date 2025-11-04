@@ -7,12 +7,12 @@ const users = require('../controllers/users');
 
 //Render register form, register user
 router.route('/register')
-    .get(users.renderRegister)
+    .get(users.renderRegisterForm)
     .post(users.register)
 
 //Render login form, login user
 router.route('/login')
-    .get(users.renderLogin)
+    .get(users.renderLoginForm)
     .post(storeReturnTo, passport.authenticate('local', { failureFlash: true, failureRedirect: '/login' }), users.login)
 
 //Logout Users

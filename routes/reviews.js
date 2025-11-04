@@ -1,9 +1,7 @@
 const express = require('express');
 const router = express.Router({ mergeParams: true });
-const {reviewJoiSchema} = require('../joiSchemas');
 const Review = require('../models/review');
 const Campground = require('../models/campground');
-const ExpressError = require('../utils/ExpressError');
 const {isLoggedIn, validateReview, isReviewAuthor} = require('../middleware.js');
 
 //New Review

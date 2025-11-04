@@ -2,61 +2,27 @@ const express = require('express');
 const router = express.Router();
 const Campground = require('../models/campground.js');
 const { isLoggedIn, validateCampground, isAuthor } = require('../middleware.js');
+const campgrounds = require('../controllers/campground.js');
 
 //Index, home show
-router.get('', async (req, res) => {
-  const campgrounds = await Campground.find();
-  res.render('campgrounds/index', { campgrounds });
-});
+router.get('', campgrounds.index);
 
 //Creating new
-router.get('/new', isLoggedIn, (req, res) => {
-  res.render('campgrounds/new');
-});
+router.get('/new', isLoggedIn, campgrounds.renderNewForm);
 
-router.post('/', isLoggedIn, validateCampground, async (req, res, next) => {
-  const campground = new Campground(req.body.campground);
-  campground.author = req.user._id;
-  await campground.save();
-  req.flash('success', 'Successfuly Created New Campground!');
-  res.redirect(`/campgrounds/${campground._id}`);
-});
-
+router.post('/', isLoggedIn, validateCampground, campgrounds.createCampground);
 
 //Show
-router.get('/:id', async (req, res) => {
-  const campground = await Campground.findById(req.params.id).populate({path: 'reviews',populate: {path: 'author'}}).populate('author');
-  if (!campground) {
-    req.flash('error', 'Campground Not Found!');
-    return res.redirect('/campgrounds');
-  }
-  res.render('campgrounds/show', { campground });
-});
-
+router.get('/:id', campgrounds.showCampground);
 
 //Updating
-router.patch('/:id', isLoggedIn, isAuthor, validateCampground, async (req, res, next) => {
-  const campground = await Campground.findByIdAndUpdate(req.params.id, req.body.campground, { new: true, runValidators: true });
-  req.flash('success', 'Successfuly Updated Campground!');
-  res.redirect(`/campgrounds/${campground._id}`);
-});
+router.patch('/:id', isLoggedIn, isAuthor, validateCampground, campgrounds.updateCampground);
 
 
 //Edit show
-router.get('/:id/edit', isLoggedIn, isAuthor, async (req, res) => {
-  const campground = await Campground.findById(req.params.id);
-  if (!campground) {
-    req.flash('error', 'Campground Not Found!');
-    return res.redirect('/campgrounds');
-  }
-  res.render('campgrounds/edit', { campground });
-});
+router.get('/:id/edit', isLoggedIn, isAuthor, campgrounds.renderEditForm);
 
 //Delete 
-router.delete('/:id', isLoggedIn, isAuthor,async (req, res) => {
-  await Campground.findByIdAndDelete(req.params.id);
-  req.flash('success', 'Campground Deleted Successfully!');
-  res.redirect('/campgrounds');
-});
+router.delete('/:id', isLoggedIn, isAuthor, campgrounds.deleteForm);
 
 module.exports = router;

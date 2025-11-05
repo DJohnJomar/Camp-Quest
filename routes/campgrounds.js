@@ -3,11 +3,17 @@ const router = express.Router();
 const Campground = require('../models/campground.js');
 const { isLoggedIn, validateCampground, isAuthor } = require('../middleware.js');
 const campgrounds = require('../controllers/campgrounds.js');
+const {storage} = require('../cloudinary');
+const multer  = require('multer')
+const upload = multer({storage});
 
 //Show campgrounds, create campground
 router.route('/')
     .get(campgrounds.index)
-    .post(isLoggedIn, validateCampground, campgrounds.createCampground);
+    // .post(isLoggedIn, validateCampground, campgrounds.createCampground);
+    .post(upload.array('image'), (req, res) => {
+        console.log(req.files);
+    })
 
 //Show create new campground form
 router.route('/new')

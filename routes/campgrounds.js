@@ -20,7 +20,7 @@ router.route('/new')
 //Show campground, update campground, delete campground
 router.route('/:id')
     .get(campgrounds.showCampground)
-    .patch(isLoggedIn, isAuthor, validateCampground, campgrounds.updateCampground)
+    .patch(isLoggedIn, isAuthor, upload.array('image'),  validateCampground, campgrounds.updateCampground)
     .delete(isLoggedIn, isAuthor, campgrounds.deleteForm)
 
 //Show edit campground form

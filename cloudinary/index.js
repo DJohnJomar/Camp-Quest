@@ -12,8 +12,10 @@ cloudinary.config({
 //Folder is folder name to use in cloudinary
 const storage = new CloudinaryStorage({
     cloudinary,
-    folder:'Camp Quest',
-    allowedFormats: ['jpeg', 'png', 'jpg']
+    params: {
+        folder:'Camp Quest',
+        allowedFormats: ['jpeg', 'png', 'jpg']
+    }
 });
 
 module.exports = {

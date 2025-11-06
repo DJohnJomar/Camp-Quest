@@ -24,7 +24,7 @@ module.exports.createCampground = async (req, res, next) => {
     req.flash('error', 'Could not geocode that location. Please try again and enter a valid location.');
     return res.redirect('/campgrounds/new');
   }
-  console.log(geodata);
+  console.log(geoData);
   const campground = new Campground(req.body.campground);
   campground.author = req.user._id;
   campground.geometry = geoData.features[0].geometry;

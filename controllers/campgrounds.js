@@ -1,8 +1,3 @@
-//Loads .env if not in production
-if (process.env.NODE_ENV !== "production") {
-  require('dotenv').config();
-}
-
 const Campground = require('../models/campground');
 const { cloudinary } = require('../cloudinary');
 const maptilerClient = require('@maptiler/client')

@@ -1,5 +1,7 @@
 const Campground = require('../models/campground');
 const {cloudinary} = require('../cloudinary');
+const maptilerClient = requrie('@maptiler/client')
+maptiler.config.apiKey = process.env.MAPTILER_API_KEY;
 
 module.exports.index = async (req, res) => {
   const campgrounds = await Campground.find();

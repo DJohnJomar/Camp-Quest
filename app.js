@@ -16,6 +16,7 @@ const passport = require('passport');
 const LocalStrategy = require('passport-local');
 const User = require('./models/user');
 const sanitizeV5 = require('./utils/mongoSanitizeV5.js');
+const helmet = require('helmet');
 
 //Routes
 const campgroundRoutes = require('./routes/campgrounds.js');
@@ -35,6 +36,7 @@ app.use(sanitizeV5({ replaceWith: '_' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride('_method'));
 app.use(morgan('tiny')); //Logs requests (method, url, status code,  size, response size, response time)
+app.use(helmet({contentSecurityPolicy:false}));
 
 //Sessions & flash
 const sessionConfig = {

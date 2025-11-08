@@ -47,6 +47,7 @@ const sessionConfig = {
     maxAge: 1000 * 60 * 60 * 24 * 7
   }
 };
+Add httpOnly: true to cookie options in cookie config
 app.use(session(sessionConfig));
 app.use(flash());
 

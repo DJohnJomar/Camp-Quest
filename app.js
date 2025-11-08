@@ -38,16 +38,18 @@ app.use(morgan('tiny')); //Logs requests (method, url, status code,  size, respo
 
 //Sessions & flash
 const sessionConfig = {
+  name:'session',
   secret:'secretnot', 
   resave:false, 
   saveUninitialized: true,
   cookie: {
     httpOnly:true,
+    // secure: true,//Activate on deployment, localHost is not secure so things break in dev
     expires: Date.now() + 1000 * 60 * 60 * 24 * 7,
     maxAge: 1000 * 60 * 60 * 24 * 7
   }
 };
-Add httpOnly: true to cookie options in cookie config
+
 app.use(session(sessionConfig));
 app.use(flash());
 

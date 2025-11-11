@@ -11,17 +11,31 @@ const morgan = require('morgan');
 const ejsMate = require('ejs-mate');
 const ExpressError = require('./utils/ExpressError');
 const session = require('express-session');
+const MongoStore = require('connect-mongo');
 const flash = require('connect-flash');
 const passport = require('passport');
 const LocalStrategy = require('passport-local');
 const User = require('./models/user');
 const sanitizeV5 = require('./utils/mongoSanitizeV5.js');
 const helmet = require('helmet');
+const dbUrl = process.env.DB_URL;
+// const dbUrl = 'mongodb://127.0.0.1:27017/camp-quest'
 
 //Routes
 const campgroundRoutes = require('./routes/campgrounds.js');
 const reviewRoutes = require('./routes/reviews.js');
 const userRoutes = require('./routes/users.js');
+
+//Connect to db
+main()
+  .then(() => {
+    console.log('Connected to DB!')
+  })
+  .catch(err => console.log(err));
+async function main() {
+  await mongoose.connect(dbUrl);
+};
+
 
 const app = express();
 app.set('query parser', 'extended');
@@ -37,10 +51,19 @@ app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride('_method'));
 app.use(morgan('tiny')); //Logs requests (method, url, status code,  size, response size, response time)
 
+const store = MongoStore.create({
+    mongoUrl: dbUrl,
+    touchAfter: 24 * 60 * 60,
+    crypto: {
+        secret: process.env.MONGO_STORE_SECRET
+    }
+});
+
 //Sessions & flash
 const sessionConfig = {
+  store,
   name:'session',
-  secret:'secretnot', 
+  secret: process.env.EXPRESS_SESSION_SECRET, 
   resave:false, 
   saveUninitialized: true,
   cookie: {
@@ -119,15 +142,7 @@ app.use('/campgrounds', campgroundRoutes);
 app.use('/campgrounds/:id/reviews', reviewRoutes);
 app.use('/', userRoutes);
 
-//Connect to db
-main()
-  .then(() => {
-    console.log('Connected to DB!')
-  })
-  .catch(err => console.log(err));
-async function main() {
-  await mongoose.connect('mongodb://127.0.0.1:27017/camp-quest');
-};
+
 
 //Root path or Route
 app.get('/', (req, res) => {
